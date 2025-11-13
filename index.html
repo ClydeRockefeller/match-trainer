@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>双列英文-中文配对训练器</title>
+<link rel="manifest" href="data:application/manifest+json,{
+  'name': '双列配对训练器',
+  'short_name': 'MatchTrainer',
+  'start_url': '.',
+  'display': 'standalone',
+  'background_color': '#0b132b',
+  'theme_color': '#5bc0be',
+  'icons': [{'src': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjNWJjMGJlIi8+CjxwYXRoIGQ9Ik0xMjggMTI4TDk2IDE2MEw2NCAxMjhMOTYgMTYwTDMyIDY0TDY0IDMyTDk2IDY0TDMyIDE2MEw2NCAxMjhMOTYgMTYwTDMyIDMyIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K', 'sizes': '192x192', 'type': 'image/svg+xml'}]
+}"/>
+<style>
+:root{--bg:#0b132b;--card:#1c2541;--accent:#5bc0be;--accent2:#6fffe9;--text:#e6eefc;--muted:#9fb3c8;--warn:#ffb703;--bad:#ef476f;--good:#06d6a0;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,Arial}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 12px 40px}
+h1{font-size:20px;margin:8px 0 12px}
+.tab-bar{display:flex;gap:0;background:var(--card);border-radius:12px 12px 0 0;margin-bottom:0;padding:8px 0}
+.tab-btn{flex:1;padding:10px 16px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:12px 12px 0 0;font-weight:500}
+.tab-btn.active{color:var(--accent);background:var(--bg)}
+.tab-content{display:none;background:var(--card);border-radius:0 12px 12px;padding:16px}
+.tab-content.active{display:block}
+.bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:var(--card);padding:12px;border-radius:12px;margin-bottom:12px}
+.bar>div{display:flex;gap:8px;align-items:center}
+input[type="text"],input[type="number"],select{background:#0f1c3a;border:1px solid #2b395f;color:var(--text);padding:8px 10px;border-radius:8px;min-width:180px}
+input[type="file"]{color:var(--muted)}
+textarea{width:100%;min-height:140px;background:#0f1c3a;border:1px solid #2b395f;color:var(--text);padding:10px;border-radius:10px;resize:vertical}
+button{background:var(--accent);color:#062726;border:0;padding:8px 12px;border-radius:10px;cursor:pointer;transition:.2s;font-size:14px;touch-action:manipulation}
+button.ghost{background:transparent;border:1px solid #2b395f;color:var(--text)}
+button.warn{background:var(--warn);color:#1c1400}
+button.bad{background:var(--bad)}
+button.good{background:var(--good);color:#003322}
+button:disabled{opacity:.5;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.col{background:var(--card);border-radius:12px;padding:12px;min-height:280px}
+.col h2{font-size:16px;margin:0 0 10px;color:var(--muted)}
+.item{display:block;width:100%;text-align:left;background:#0f1c3a;color:var(--text);border:1px solid #2b395f;border-radius:10px;padding:12px;margin-bottom:8px;white-space:normal;overflow-wrap:break-word;max-height:60px;overflow:hidden;transition:all 0.3s ease;min-height:44px;box-sizing:border-box}
+.item.sel{outline:3px solid var(--accent2);border-color:var(--accent2);background:#2b395f !important;transform:scale(1.02)}
+.item:hover{background:#2b395f;transform:translateY(-1px)}
+.item:active{transform:scale(0.98)}
+.msg{margin-top:8px;min-height:24px;color:var(--muted)}
+.flex{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.grow{flex:1}
+.progress{height:10px;background:#0f1c3a;border-radius:999px;overflow:hidden;border:1px solid #2b395f}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.3s}
+.small{font-size:12px;color:var(--muted)}
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:8px;background:#0f1c3a;border-radius:8px;margin-bottom:4px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:1000;justify-content:center;align-items:center}
+.modal-content{background:var(--card);padding:20px;border-radius:12px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto}
+.close{position:absolute;top:10px;right:20px;color:var(--muted);font-size:24px;cursor:pointer}
+.badge{background:var(--good);padding:4px 8px;border-radius:999px;font-size:12px;margin-left:8px}
+.review-date{font-size:10px;color:var(--muted);display:block;margin-top:4px;}
+.loading{display:none;text-align:center;padding:20px;color:var(--accent)}
+.loading.active{display:block}
+.skeleton{height:44px;background:#2b395f;border-radius:10px;margin-bottom:8px;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:-468px 0}100%{background-position:468px 0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.success{animation:fadeIn .5s;color:var(--good)}
+.error{animation:shake .5s;color:var(--bad)}
+.preview-count{font-size:12px;color:var(--muted);margin-top:4px;text-align:right}
+.rating-modal .modal-content{max-width:300px;text-align:center}
+.rating-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.rating-btn{background:var(--card);border:1px solid var(--accent);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer;transition:.2s}
+.rating-btn:hover{background:var(--accent)}
+.rating-btn.selected{background:var(--accent);color:#062726}
+.sync-status{margin-top:8px;padding:8px;background:#0f1c3a;border-radius:8px;text-align:center}
+.locked{opacity:0.5;pointer-events:none}
+.tip-box{background:#0f1c3a;border:1px solid var(--accent);padding:10px;border-radius:8px;margin:8px 0}
+@media(max-width:720px){.grid{grid-template-columns:1fr};.bar{flex-direction:column;align-items:stretch};.item{padding:16px;font-size:16px};button{padding:12px 16px;font-size:16px};.wrap{padding:8px}}
+@media(max-width:540px){.wrap{padding:8px};.grid{gap:8px};h1{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔤 双列英文-中文配对训练器</h1>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="train">今日训练</button>
+    <button class="tab-btn" data-tab="review">回顾模式</button>
+    <button class="tab-btn" data-tab="manage">数据管理</button>
+    <button class="tab-btn" data-tab="settings">设置</button>
+  </div>
+
+  <div id="train" class="tab-content active">
+    <div class="bar">
+      <div><label>会话名</label><input type="text" id="sessionName" placeholder="e.g. 2025-11-14-基础" value="今日训练"/></div>
+      <div><label>显示对数</label><input type="number" id="visibleCount" min="3" max="12" value="6"/></div>
+      <div class="flex"><input type="file" id="file" accept=".csv,.txt,.json"/><button class="ghost" id="loadBtn">加载/重置</button><button class="ghost" id="demoBtn">示例数据</button></div>
+      <div class="grow"></div>
+      <div class="small" id="stats">进度 0/0 | 错题 0</div>
+    </div>
+    <textarea id="dataBox" placeholder='粘贴词组: en,zh 或 en\tzh 或 en,zh,sentence\ne.g.\ntake care,小心,Please take care of yourself.\nrun fast,跑得快,The rabbit can run fast.'></textarea>
+    <div class="preview-count" id="previewCount">有效行: 0</div>
+    <div class="tip-box" id="forceTip" style="display:none">强制复习锁定：请完成<span id="remainingCount">0</span>项复习后解锁新内容。<button class="ghost" id="skipForce">临时跳过</button></div>
+    <div class="flex"><button class="good" id="ttsBtn">测试发音</button><button class="warn" id="forceCheck">检查强制</button><button class="ghost" id="pauseBtn">暂停</button><button class="ghost" id="resetBtn">重置</button><button class="ghost" id="fullscreenBtn">全屏</button></div>
+    <div class="loading" id="loading"><div>加载中...</div><div class="skeleton"></div><div class="skeleton"></div></div>
+    <div class="grid">
+      <div class="col"><h2>英文</h2><div id="leftCol"></div></div>
+      <div class="col"><h2>中文</h2><div id="rightCol"></div></div>
+    </div>
+    <div class="msg" id="msg"></div>
+    <div class="flex"><div class="progress grow"><span id="bar" style="width:0%"></span></div><div class="small" id="counter">0%</div></div>
+  </div>
+
+  <div id="review" class="tab-content">
+    <div class="bar"><button class="ghost" id="loadReview">加载今日必审</button><button class="ghost" id="notifyOpt">通知设置</button></div>
+    <div id="reviewList" class="list-item" style="display:none">无待审项</div>
+    <div class="grid" id="reviewGrid" style="display:none"><!-- 复用匹配UI --></div>
+  </div>
+
+  <div id="manage" class="tab-content">
+    <h2>会话列表</h2>
+    <div id="sessionList"></div>
+    <button class="ghost" id="exportCSV">导出错题CSV</button><button class="bad" id="clearSession">删除当前</button><button class="ghost" id="backupJSON">备份JSON</button><button class="ghost" id="openRecycle">打开回收站</button>
+    <div class="sync-status" id="syncStatus">同步状态: 本地 | <button class="ghost" id="syncCloud">云同步</button></div>
+  </div>
+
+  <div id="settings" class="tab-content">
+    <h2>算法设置</h2>
+    <div class="bar"><label>强制阈值</label><input type="number" id="forceThreshold" min="30" max="90" value="50"/>%<button class="ghost" id="saveSettings">保存</button></div>
+    <h2>通知与PWA</h2>
+    <div class="bar"><label>启用通知</label><input type="checkbox" id="enableNotify"/><label>启用TTS</label><input type="checkbox" id="enableTTS" checked/><label>TTS口音</label><select id="ttsAccent"><option value="en-US">美音</option><option value="en-GB">英音</option></select></div>
+    <h2>扩展</h2>
+    <div class="bar"><label>启用例句</label><input type="checkbox" id="enableSentence" checked/><label>滑动匹配</label><input type="checkbox" id="enableSwipe" checked/><label>临时跳过强制</label><input type="checkbox" id="allowSkipForce" checked/></div>
+    <div class="tip-box">首次使用提示：强制复习可保护学习效果，临时跳过允许灵活操作，但建议完成以优化记忆。[web:129]</div>
+  </div>
+</div>
+
+<!-- 模态框: 确认覆盖 -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3 id="confirmTitle">确认操作</h3>
+    <p id="confirmText"></p>
+    <div class="flex"><button class="bad" id="confirmYes">确认</button><button class="ghost" id="confirmNo">取消</button></div>
+  </div>
+</div>
+
+<!-- 回收站模态 -->
+<div id="recycleModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3>回收站</h3>
+    <div id="recycleList"></div>
+    <button class="good" id="restoreAll">全部还原</button>
+  </div>
+</div>
+
+<!-- 质量评级模态 -->
+<div id="ratingModal" class="modal rating-modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3>评估回忆质量 (0-5)</h3>
+    <p>5: 完美<br>4: 正确但犹豫<br>3: 正确但困难<br>2: 错误但易记<br>1: 错误但记得<br>0: 完全忘记</p>
+    <div class="rating-btns">
+      <button class="rating-btn" data-q="5">5</button>
+      <button class="rating-btn" data-q="4">4</button>
+      <button class="rating-btn" data-q="3">3</button>
+      <button class="rating-btn" data-q="2">2</button>
+      <button class="rating-btn" data-q="1">1</button>
+      <button class="rating-btn" data-q="0">0</button>
+    </div>
+    <p id="ratingItem"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  // 全局元素
+  const qs = s => document.querySelector(s);
+  const qsa = s => Array.from(document.querySelectorAll(s));
+  const DB_NAME = 'MatchTrainerDB';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'sessions';
+  const RECYCLE_STORE = 'recycle';
+  let db = null;
+  let currentSession = null;
+  let items = []; // {id, en, zh, sentence?, mastered: false, errors: 0, reviews: 0, lastReview: 0, nextReview: 0, stubborn: false, efactor: 2.5, repetitions: 0, interval: 0}
+  let pool = [];
+  let visibleLeft = [];
+  let visibleRight = [];
+  let selLeft = null, selRight = null;
+  let wrongCount = 0;
+  let forceThreshold = 50;
+  let enableNotify = false;
+  let enableTTS = true;
+  let ttsAccent = 'en-US';
+  let enableSentence = true;
+  let enableSwipe = true;
+  let allowSkipForce = true;
+  let paused = false;
+  let touchStartX = 0, touchStartY = 0;
+  let synth = null;
+  let pendingRating = null;
+  let forceLocked = false; // 新增：强制锁状态
+  let remainingForce = 0; // 剩余强制复习项
+  const el = {
+    tabs: qsa('.tab-btn'),
+    contents: qsa('.tab-content'),
+    sessionName: qs('#sessionName'),
+    visibleCount: qs('#visibleCount'),
+    file: qs('#file'),
+    dataBox: qs('#dataBox'),
+    previewCount: qs('#previewCount'),
+    loadBtn: qs('#loadBtn'),
+    demoBtn: qs('#demoBtn'),
+    ttsBtn: qs('#ttsBtn'),
+    forceCheck: qs('#forceCheck'),
+    left: qs('#leftCol'),
+    right: qs('#rightCol'),
+    msg: qs('#msg'),
+    stats: qs('#stats'),
+    bar: qs('#bar'),
+    counter: qs('#counter'),
+    sessionList: qs('#sessionList'),
+    loadReview: qs('#loadReview'),
+    notifyOpt: qs('#notifyOpt'),
+    exportCSV: qs('#exportCSV'),
+    clearSession: qs('#clearSession'),
+    backupJSON: qs('#backupJSON'),
+    openRecycle: qs('#openRecycle'),
+    syncCloud: qs('#syncCloud'),
+    syncStatus: qs('#syncStatus'),
+    forceThreshold: qs('#forceThreshold'),
+    enableNotify: qs('#enableNotify'),
+    enableTTS: qs('#enableTTS'),
+    ttsAccent: qs('#ttsAccent'),
+    enableSentence: qs('#enableSentence'),
+    enableSwipe: qs('#enableSwipe'),
+    allowSkipForce: qs('#allowSkipForce'),
+    saveSettings: qs('#saveSettings'),
+    confirmModal: qs('#confirmModal'),
+    confirmTitle: qs('#confirmTitle'),
+    confirmText: qs('#confirmText'),
+    confirmYes: qs('#confirmYes'),
+    confirmNo: qs('#confirmNo'),
+    recycleModal: qs('#recycleModal'),
+    recycleList: qs('#recycleList'),
+    restoreAll: qs('#restoreAll'),
+    ratingModal: qs('#ratingModal'),
+    ratingItem: qs('#ratingItem'),
+    pauseBtn: qs('#pauseBtn'),
+    resetBtn: qs('#resetBtn'),
+    fullscreenBtn: qs('#fullscreenBtn'),
+    loading: qs('#loading'),
+    forceTip: qs('#forceTip'),
+    remainingCount: qs('#remainingCount'),
+    skipForce: qs('#skipForce'),
+  };
+
+  // SM-2 算法实现
+  function sm2Update(item, quality) {
+    item.repetitions = (item.repetitions || 0) + 1;
+    if (quality < 3) {
+      item.repetitions = 1;
+      item.interval = 1;
+    } else {
+      if (item.repetitions === 1) {
+        item.interval = 1;
+      } else if (item.repetitions === 2) {
+        item.interval = 6;
+      } else {
+        item.interval = Math.max(1, Math.round(item.interval * item.efactor));
+      }
+    }
+    const delta = 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02);
+    item.efactor = Math.max(1.3, item.efactor + delta);
+    item.nextReview = Date.now() + item.interval * 86400000;
+    item.lastReview = Date.now();
+    checkForce(); // 更新后检查强制状态
+  }
+
+  // 初始化 TTS
+  function initTTS() {
+    if ('speechSynthesis' in window) {
+      synth = window.speechSynthesis;
+      synth.cancel();
+    } else {
+      flash('浏览器不支持TTS，请检查设置。', 'warn');
+    }
+  }
+
+  // TTS 播放 (添加振动反馈)
+  function speak(text, isError = false) {
+    if (!enableTTS || !synth) return;
+    if (document.visibilityState === 'hidden') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') speak(text, isError);
+      }, { once: true });
+      return;
+    }
+    synth.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = ttsAccent;
+    utter.rate = isError ? 1.2 : 0.9;
+    utter.pitch = isError ? 1.2 : 1.0;
+    utter.volume = 0.8;
+    utter.onerror = () => flash('TTS播放失败，请重试。', 'error');
+    synth.speak(utter);
+    if ('vibrate' in navigator && isError) navigator.vibrate(200); // 错误振动
+  }
+
+  // 错误处理包装
+  function safeAsync(fn, onError = null) {
+    return async (...args) => {
+      try { return await fn(...args); } catch (e) { console.error(e); if (onError) onError(e); flash('操作出错，请重试。', 'error'); }
+    };
+  }
+
+  // IndexedDB 初始化
+  async function initDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => { db = request.result; resolve(); };
+      request.onupgradeneeded = e => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains(RECYCLE_STORE)) {
+          db.createObjectStore(RECYCLE_STORE, { keyPath: 'id' });
+        }
+      };
+    });
+  }
+
+  // 保存会话
+  const saveSession = safeAsync(async () => {
+    if (!db) return;
+    let name = el.sessionName.value.trim() || 'Untitled';
+    const id = currentSession || Date.now().toString();
+    const data = {
+      id,
+      name,
+      items: items.map(i => ({...i})),
+      wrongCount,
+      timestamp: Date.now(),
+    };
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    await new Promise((res, rej) => {
+      const req = store.put(data);
+      req.onsuccess = res;
+      req.onerror = rej;
+    });
+    currentSession = id;
+    await renderSessions();
+    updateSyncStatus();
+    checkForce(); // 保存后检查强制
+  });
+
+  // 加载会话
+  const loadSession = safeAsync(async (sessionId) => {
+    if (!db) return null;
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    return new Promise((res, rej) => {
+      const req = store.get(sessionId);
+      req.onsuccess = () => {
+        const data = req.result;
+        if (data) {
+          items = data.items.map((item, idx) => ({...item, id: idx}));
+          wrongCount = data.wrongCount || 0;
+          el.sessionName.value = data.name;
+          currentSession = data.id;
+          initState();
+          flash(`会话 "${data.name}" 加载成功！`, 'success');
+          switchTab('train');
+          checkForce();
+        } else {
+          flash('加载失败，会话不存在。', 'bad');
+        }
+        res(data);
+      };
+      req.onerror = rej;
+    });
+  });
+
+  // 删除会话
+  const deleteSession = safeAsync(async (sessionId) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    await new Promise((res, rej) => {
+      const req = store.delete(sessionId);
+      req.onsuccess = () => { res(); if (currentSession === sessionId) { currentSession = null; items = []; initState(); forceLocked = false; } };
+      req.onerror = rej;
+    });
+    flash('会话已删除。', 'warn');
+    renderSessions();
+  });
+
+  // 解析输入 (加强验证)
+  function parseText(text) {
+    const lines = text.split(/\r?\n/).map(s => s.trim()).filter(line => line && !/^\s*$/.test(line));
+    const out = [];
+    for (let i = 0; i < lines.length && out.length < 25; i++) {
+      let parts = lines[i].includes('\t') ? lines[i].split('\t') : lines[i].split(',');
+      parts = parts.map(s => s.trim()).filter(Boolean);
+      if (parts.length >= 2 && parts[0] && parts[1]) {
+        const en = parts[0];
+        const zh = parts[1];
+        const sentence = parts[2] || '';
+        out.push({en, zh, sentence, id: out.length, mastered: false, errors: 0, reviews: 0, lastReview: 0, nextReview: Date.now() + 86400000, stubborn: false, efactor: 2.5, repetitions: 0, interval: 0});
+      }
+    }
+    if (out.length > 25) flash('输入超过25对，已截取前25对。', 'warn');
+    return out;
+  }
+
+  // 实时预览计数
+  el.dataBox.oninput = () => {
+    const valid = parseText(el.dataBox.value).length;
+    el.previewCount.textContent = `有效行: ${valid}`;
+  };
+
+  // 解析JSON
+  function parseJSON(json) {
+    try {
+      const data = JSON.parse(json);
+      items = data.items.map((item, idx) => ({...item, id: idx}));
+      wrongCount = data.wrongCount || 0;
+      initState();
+      saveSession();
+      flash('JSON导入成功。', 'success');
+    } catch (e) {
+      flash('JSON格式无效。', 'bad');
+    }
+  }
+
+  // 初始化状态
+  function initState() {
+    pool = items.map(x => x.id).filter(id => !items[id].mastered);
+    shuffle(pool);
+    visibleLeft = [];
+    visibleRight = [];
+    selLeft = selRight = null;
+    refill();
+    render();
+  }
+
+  // 随机洗牌
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // 补位
+  function refill() {
+    const want = Math.min(parseInt(el.visibleCount.value || 6), 12);
+    visibleLeft = [];
+    visibleRight = [];
+    const candidates = shuffle(pool.filter(id => !items[id].mastered && visibleLeft.indexOf(id) === -1));
+    for (let i = 0; i < want && candidates.length > 0; i++) {
+      const nid = candidates[i];
+      if (nid !== undefined) visibleLeft.push(nid);
+    }
+    visibleRight = shuffle([...visibleLeft]);
+  }
+
+  // 获取项
+  function getItem(id) { return items[id]; }
+
+  // 渲染列 (优化长文本折叠)
+  function renderCol(side, arr, selId) {
+    const wrap = side === 'L' ? el.left : el.right;
+    wrap.innerHTML = '';
+    arr.forEach(id => {
+      const data = getItem(id);
+      const btn = document.createElement('button');
+      btn.className = 'item' + (selId === id ? ' sel' : '');
+      let content = side === 'L' ? data.en : data.zh;
+      if (content.length > 20) content = content.substring(0, 20) + '...'; // 折叠长文本
+      btn.innerHTML = content + `<span class="review-date">下次复习: ${new Date(data.nextReview).toLocaleDateString()}</span>`;
+      if (enableSentence && data.sentence) btn.title = data.sentence;
+      btn.onclick = (e) => handleClick(e, side, id);
+      if (enableSwipe) {
+        btn.ontouchstart = (e) => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; };
+        btn.ontouchend = (e) => handleSwipe(e, side, id);
+      }
+      wrap.appendChild(btn);
+    });
+  }
+
+  // 点击处理
+  function handleClick(e, side, id) {
+    if (paused) return;
+    e.preventDefault();
+    if (side === 'L') selLeft = id;
+    else selRight = id;
+    render();
+    if (selLeft && selRight) setTimeout(() => checkMatch(), 100);
+  }
+
+  // 滑动匹配 (移动端优化)
+  function handleSwipe(e, side, id) {
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 50) {
+      if (deltaX > 0 && side === 'L') selLeft = id;
+      else if (deltaX < 0 && side === 'R') selRight = id;
+      render();
+      if (selLeft && selRight) checkMatch();
+    }
+  }
+
+  // 检查匹配
+  function checkMatch() {
+    if (selLeft === null || selRight === null) return;
+    const itemL = getItem(selLeft);
+    const leftIdx = visibleLeft.indexOf(selLeft);
+    const rightIdx = visibleRight.indexOf(selRight);
+    const leftBtn = el.left.children[leftIdx];
+    const rightBtn = el.right.children[rightIdx];
+    if (selLeft === selRight) {
+      speak(itemL.en, false);
+      leftBtn.style.transform = 'scale(1.1)';
+      rightBtn.style.transform = 'scale(1.1)';
+      itemL.mastered = true;
+      itemL.reviews++;
+      visibleLeft.splice(leftIdx, 1);
+      visibleRight.splice(rightIdx, 1);
+      selLeft = selRight = null;
+      pendingRating = itemL.id;
+      el.ratingItem.textContent = `${itemL.en} - ${itemL.zh}`;
+      el.ratingModal.style.display = 'flex';
+      flash('匹配正确！请评估质量。', 'good');
+      setTimeout(() => {
+        render();
+        el.loading.classList.remove('active');
+        checkForce(); // 检查解锁
+      }, 500);
+    } else {
+      speak('不匹配', true);
+      leftBtn.classList.add('error');
+      rightBtn.classList.add('error');
+      itemL.errors++;
+      wrongCount++;
+      selRight = null;
+      flash('不匹配，再试！', 'warn');
+      if (itemL.errors > 3 && itemL.reviews >= 5) markStubborn(itemL);
+      setTimeout(() => {
+        leftBtn.classList.remove('error');
+        rightBtn.classList.remove('error');
+        render();
+      }, 500);
+    }
+    saveSession();
+  }
+
+  // 评级处理
+  qsa('.rating-btn').forEach(btn => {
+    btn.onclick = () => {
+      const q = parseInt(btn.dataset.q);
+      if (pendingRating !== null) {
+        const item = getItem(pendingRating);
+        sm2Update(item, q);
+        pendingRating = null;
+        el.ratingModal.style.display = 'none';
+        qsa('.rating-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        flash(`质量${q}已记录，下次间隔${item.interval}天。`, 'success');
+        if (item.repetitions >= 3) {
+          item.mastered = true;
+        }
+        refill();
+        render();
+        saveSession();
+      }
+    };
+  });
+
+  // 标记顽固
+  function markStubborn(item) {
+    item.stubborn = true;
+    pool.unshift(item.id);
+  }
+
+  // 强制检查 (优化：友善提示 + 临时跳过)
+  const checkForce = safeAsync(async () => {
+    const pending = items.filter(i => !i.mastered && Date.now() >= i.nextReview).length;
+    const totalPending = items.filter(i => Date.now() >= i.nextReview).length;
+    const pct = totalPending > 0 ? Math.round((totalPending - pending) / totalPending * 100) : 100;
+    remainingForce = pending;
+    el.remainingCount.textContent = pending;
+    if (pct < forceThreshold) {
+      forceLocked = true;
+      el.forceTip.style.display = 'block';
+      el.loadBtn.disabled = true;
+      el.dataBox.disabled = true;
+      el.demoBtn.disabled = true;
+      el.file.disabled = true;
+      flash(`需完成${pending}项复习 (当前${pct}%) 解锁新输入。还差${pending}项即可解锁！`, 'warn');
+    } else {
+      forceLocked = false;
+      el.forceTip.style.display = 'none';
+      el.loadBtn.disabled = false;
+      el.dataBox.disabled = false;
+      el.demoBtn.disabled = false;
+      el.file.disabled = false;
+      flash('可输入新内容！<span class="badge">解锁成功</span>', 'good');
+    }
+  });
+
+  // 临时跳过强制
+  el.skipForce.onclick = () => {
+    if (allowSkipForce && remainingForce <= 2) {
+      forceLocked = false;
+      el.forceTip.style.display = 'none';
+      el.loadBtn.disabled = false;
+      el.dataBox.disabled = false;
+      el.demoBtn.disabled = false;
+      el.file.disabled = false;
+      flash('临时跳过已启用，建议尽快补复习以优化记忆。', 'warn');
+    } else {
+      flash('跳过失败：剩余项过多或未启用跳过。', 'bad');
+    }
+  };
+
+  // 渲染
+  function render() {
+    requestAnimationFrame(() => {
+      renderCol('L', visibleLeft, selLeft);
+      renderCol('R', visibleRight, selRight);
+      const done = items.filter(i => i.mastered).length;
+      const total = items.length;
+      const pct = total ? Math.round(done / total * 100) : 0;
+      el.bar.style.width = pct + '%';
+      el.counter.textContent = pct + '%';
+      el.stats.textContent = `进度 ${done}/${total} | 错题 ${wrongCount}`;
+      if (pct >= forceThreshold) checkStubbornCover();
+    });
+  }
+
+  // 检查顽固覆盖
+  function checkStubbornCover() {
+    const stubbornItems = items.filter(i => i.stubborn && !i.mastered);
+    if (stubbornItems.length === 0) return;
+    const easyItems = items.filter(i => i.nextReview > Date.now() + 60 * 86400000 && !i.stubborn);
+    if (easyItems.length > 0) {
+      const easy = easyItems[0];
+      showConfirm('覆盖易项?', `顽固项将替换${easy.en}。`, async () => {
+        await recycleItem(easy);
+        flash('已覆盖。', 'warn');
+        render();
+      });
+    }
+  }
+
+  // 闪讯
+  let msgTimer = null;
+  function flash(text, kind = '') {
+    el.msg.innerHTML = text;
+    el.msg.className = kind;
+    if (msgTimer) clearTimeout(msgTimer);
+    msgTimer = setTimeout(() => { el.msg.innerHTML = ''; el.msg.className = ''; }, 3000);
+  }
+
+  // Tab切换
+  function switchTab(tabName) {
+    el.tabs.forEach(t => t.classList.remove('active'));
+    el.contents.forEach(c => c.classList.remove('active'));
+    qs(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
+    qs(`#${tabName}`).classList.add('active');
+    if (tabName === 'manage') renderSessions();
+    if (tabName === 'review') loadTodayReview();
+  }
+  el.tabs.forEach(tab => {
+    tab.onclick = () => switchTab(tab.dataset.tab);
+  });
+
+  // 加载事件 (强制锁检查)
+  el.loadBtn.onclick = safeAsync(async () => {
+    if (forceLocked && !allowSkipForce) {
+      flash('请先完成强制复习或启用临时跳过。', 'bad');
+      return;
+    }
+    el.loading.classList.add('active');
+    if (el.file.files[0] && el.file.files[0].name.endsWith('.json')) {
+      const text = await el.file.files[0].text();
+      parseJSON(text);
+      return;
+    }
+    items = parseText(el.dataBox.value);
+    if (items.length === 0) { flash('无有效数据。', 'bad'); el.loading.classList.remove('active'); return; }
+    initState();
+    await saveSession();
+    await checkForce();
+    flash(`加载${items.length}对词组。`, 'success');
+    el.loading.classList.remove('active');
+  });
+
+  el.demoBtn.onclick = () => {
+    if (forceLocked && !allowSkipForce) {
+      flash('请先完成强制复习。', 'bad');
+      return;
+    }
+    el.dataBox.value = `take care,小心,Please take care of yourself.\nrun fast,跑得快,The rabbit can run fast.\nlook around,环顾四周,Look around before crossing.\nfeel good,感觉好,I feel good today.\nbreak down,崩溃,The car broke down.\nbuild up,积累,Build up your skills.\nget along,相处,We get along well.\nhand in,提交,Hand in your homework.\nlook forward to,期待,I look forward to it.\npay attention to,注意,Pay attention to details.\nput off,推迟,Put off the meeting.\nset up,建立,Set up the tent.\nturn down,拒绝,Turn down the offer.\ntake off,起飞,The plane takes off.\nwork out,解决,Work out the problem.`;
+    el.loadBtn.click();
+  };
+
+  el.ttsBtn.onclick = () => speak('test pronunciation', false);
+  el.forceCheck.onclick = checkForce;
+  el.file.onchange = () => el.loadBtn.click();
+  el.visibleCount.oninput = () => { if (!forceLocked) { refill(); render(); } };
+  el.pauseBtn.onclick = () => { paused = !paused; el.pauseBtn.textContent = paused ? '恢复' : '暂停'; flash(paused ? '已暂停' : '已恢复', 'warn'); };
+  el.resetBtn.onclick = () => { if (!forceLocked) { initState(); flash('已重置。', 'warn'); } };
+  el.fullscreenBtn.onclick = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => flash('全屏不支持。', 'warn'));
+  };
+
+  // 回顾加载
+  const loadTodayReview = safeAsync(async () => {
+    const todayReview = items.filter(i => !i.mastered && Date.now() >= i.nextReview);
+    if (todayReview.length === 0) {
+      qs('#reviewList').textContent = '无今日必审项';
+      qs('#reviewList').style.display = 'block';
+      qs('#reviewGrid').style.display = 'none';
+      flash('无今日必审项。', 'muted');
+      return;
+    }
+    items = todayReview.map((i, idx) => ({...i, id: idx}));
+    initState();
+    qs('#reviewGrid').innerHTML = '<div class="grid"><div class="col"><h2>英文</h2><div id="leftCol"></div></div><div class="col"><h2>中文</h2><div id="rightCol"></div></div></div>';
+    el.left = qs('#reviewGrid #leftCol');
+    el.right = qs('#reviewGrid #rightCol');
+    render();
+    qs('#reviewGrid').style.display = 'block';
+    qs('#reviewList').style.display = 'none';
+    flash(`已加载${todayReview.length}项今日必审。`, 'success');
+  });
+  el.loadReview.onclick = loadTodayReview;
+
+  // 渲染会话列表
+  const renderSessions = safeAsync(async () => {
+    if (!db) return;
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const all = await new Promise((res, rej) => {
+      const req = store.getAll();
+      req.onsuccess = () => res(req.result);
+      req.onerror = rej;
+    });
+    all.sort((a, b) => b.timestamp - a.timestamp);
+    el.sessionList.innerHTML = all.map(s => `
+      <div class="list-item">
+        <span>${s.name} (${new Date(s.timestamp).toLocaleDateString('zh-CN')}) - ${s.items.length} 对词组</span>
+        <div>
+          <button class="ghost" onclick="loadSession('${s.id}')">加载</button>
+          <button class="bad ghost" onclick="deleteSession('${s.id}')">删除</button>
+        </div>
+      </div>
+    `).join('');
+  });
+
+  // 导出CSV
+  el.exportCSV.onclick = () => {
+    const wrongs = items.filter(i => i.errors > 0).map(i => `${i.en},${i.zh},${i.errors}`);
+    const csv = 'en,zh,errors\n' + wrongs.join('\n');
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${el.sessionName.value || 'wrongs'}.csv`;
+    a.click();
+    flash('错题已导出。', 'success');
+  };
+
+  // 备份JSON (云同步简化)
+  el.backupJSON.onclick = () => {
+    const data = {items, wrongCount, timestamp: Date.now()};
+    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${el.sessionName.value || 'backup'}.json`;
+    a.click();
+    flash('备份已下载。可导入其他设备实现同步。', 'success');
+    updateSyncStatus();
+  };
+
+  // 云同步
+  el.syncCloud.onclick = () => {
+    flash('云同步: 下载JSON备份并在其他设备导入。Firebase集成需API密钥配置。', 'muted');
+    el.backupJSON.click();
+  };
+
+  function updateSyncStatus() {
+    el.syncStatus.innerHTML = '同步状态: 本地 | <button class="ghost" id="syncCloud">云同步</button>';
+  }
+
+  // 删除当前会话
+  el.clearSession.onclick = () => {
+    if (!currentSession) { flash('无当前会话。', 'warn'); return; }
+    showConfirm('删除会话?', '确认删除当前会话？', async () => {
+      await deleteSession(currentSession);
+    });
+  };
+
+  // 设置保存
+  el.saveSettings.onclick = () => {
+    forceThreshold = parseInt(el.forceThreshold.value) || 50;
+    enableNotify = el.enableNotify.checked;
+    enableTTS = el.enableTTS.checked;
+    ttsAccent = el.ttsAccent.value;
+    enableSentence = el.enableSentence.checked;
+    enableSwipe = el.enableSwipe.checked;
+    allowSkipForce = el.allowSkipForce.checked;
+    localStorage.setItem('settings', JSON.stringify({forceThreshold, enableNotify, enableTTS, ttsAccent, enableSentence, enableSwipe, allowSkipForce}));
+    initTTS();
+    flash('设置已保存。', 'success');
+  };
+
+  // 模态确认
+  function showConfirm(title, text, onYes) {
+    el.confirmTitle.textContent = title;
+    el.confirmText.textContent = text;
+    el.confirmModal.style.display = 'flex';
+    const yesHandler = () => { onYes(); el.confirmModal.style.display = 'none'; };
+    el.confirmYes.onclick = yesHandler;
+  }
+  el.confirmNo.onclick = () => el.confirmModal.style.display = 'none';
+  qsa('.close').forEach(c => c.onclick = () => { 
+    el.confirmModal.style.display = 'none'; 
+    el.recycleModal.style.display = 'none'; 
+    el.ratingModal.style.display = 'none'; 
+  });
+
+  // 回收项
+  const recycleItem = safeAsync(async (item) => {
+    const tx = db.transaction(RECYCLE_STORE, 'readwrite');
+    const store = tx.objectStore(RECYCLE_STORE);
+    item.recycleTime = Date.now();
+    await new Promise((res, rej) => {
+      const req = store.put(item);
+      req.onsuccess = res;
+      req.onerror = rej;
+    });
+    items = items.filter(i => i.id !== item.id);
+    initState();
+  });
+
+  // 渲染回收站 (自动清理>30天)
+  const renderRecycle = safeAsync(async () => {
+    const tx = db.transaction(RECYCLE_STORE, 'readonly');
+    const store = tx.objectStore(RECYCLE_STORE);
+    const all = await new Promise((res, rej) => {
+      const req = store.getAll();
+      req.onsuccess = () => res(req.result);
+      req.onerror = rej;
+    });
+    const now = Date.now();
+    const valid = all.filter(item => now - (item.recycleTime || 0) <= 30 * 86400000);
+    if (valid.length < all.length) {
+      await cleanOldRecycle(all.filter(item => now - (item.recycleTime || 0) > 30 * 86400000));
+    }
+    el.recycleList.innerHTML = valid.map(i => `<div class="list-item"><span>${i.en} - ${i.zh} (${new Date(i.recycleTime).toLocaleDateString()})</span><button class="ghost" onclick="restoreItem('${i.id}')">还原</button></div>`).join('');
+  });
+  el.openRecycle.onclick = () => {
+    renderRecycle();
+    el.recycleModal.style.display = 'flex';
+  };
+
+  // 清理旧回收项
+  const cleanOldRecycle = safeAsync(async (oldItems) => {
+    const tx = db.transaction(RECYCLE_STORE, 'readwrite');
+    const store = tx.objectStore(RECYCLE_STORE);
+    for (const item of oldItems) {
+      await new Promise((res, rej) => {
+        const req = store.delete(item.id);
+        req.onsuccess = res;
+        req.onerror = rej;
+      });
+    }
+    flash(`${oldItems.length}个旧项已自动清理。`, 'warn');
+  });
+
+  // 还原所有
+  el.restoreAll.onclick = safeAsync(async () => {
+    const tx = db.transaction(RECYCLE_STORE, 'readwrite');
+    const store = tx.objectStore(RECYCLE_STORE);
+    const all = await new Promise((res, rej) => {
+      const req = store.getAll();
+      req.onsuccess = () => res(req.result);
+      req.onerror = rej;
+    });
+    items.push(...all);
+    await new Promise((res, rej) => {
+      const req = store.clear();
+      req.onsuccess = res;
+      req.onerror = rej;
+    });
+    initState();
+    flash('已还原所有。', 'good');
+    el.recycleModal.style.display = 'none';
+  });
+
+  // 还原单个
+  window.restoreItem = safeAsync(async (id) => {
+    const tx = db.transaction(RECYCLE_STORE, 'readwrite');
+    const store = tx.objectStore(RECYCLE_STORE);
+    const item = await new Promise((res, rej) => {
+      const req = store.get(id);
+      req.onsuccess = () => res(req.result);
+      req.onerror = rej;
+    });
+    if (item) {
+      items.push(item);
+      await new Promise((res, rej) => {
+        const req = store.delete(id);
+        req.onsuccess = res;
+        req.onerror = rej;
+      });
+      initState();
+      renderRecycle();
+      flash('已还原。', 'good');
+    }
+  });
+
+  // 通知
+  el.notifyOpt.onclick = () => {
+    if (Notification.permission !== 'granted') Notification.requestPermission().then(() => flash('通知权限已请求。', 'muted'));
+    if (enableNotify) flash('通知已启用，下次到期将提醒。', 'good');
+  };
+  setInterval(() => {
+    if (enableNotify && Notification.permission === 'granted') {
+      const pending = items.filter(i => Date.now() >= i.nextReview).length;
+      if (pending > 0) new Notification('复习提醒', {body: `有${pending}项待审。`, icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjNWJjMGJlIi8+CjxwYXRoIGQ9Ik0xMjggMTI4TDk2IDE2MEw2NCAxMjhMOTYgMTYwTDMyIDY0TDY0IDMyTDk2IDY0TDMyIDE2MEw2NCAxMjhMOTYgMTYwTDMyIDMyIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K'});
+    }
+  }, 3600000);
+
+  // 自动压缩>90天 + 回收>30天
+  const compressOld = safeAsync(async () => {
+    if (!db) return;
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const all = await new Promise((res, rej) => {
+      const req = store.getAll();
+      req.onsuccess = () => res(req.result);
+      req.onerror = rej;
+    });
+    const now = Date.now();
+    for (const s of all) {
+      if (now - s.timestamp > 90 * 86400000) {
+        await new Promise((res, rej) => {
+          const req = store.delete(s.id);
+          req.onsuccess = res;
+          req.onerror = rej;
+        });
+      }
+    }
+    // 清理回收站
+    const recycleTx = db.transaction(RECYCLE_STORE, 'readwrite');
+    const recycleStore = recycleTx.objectStore(RECYCLE_STORE);
+    const recycles = await new Promise((res, rej) => {
+      const req = recycleStore.getAll();
+      req.onsuccess = () => res(req.result);
+      req.onerror = rej;
+    });
+    const oldRecycles = recycles.filter(item => now - (item.recycleTime || 0) > 30 * 86400000);
+    for (const item of oldRecycles) {
+      await new Promise((res, rej) => {
+        const req = recycleStore.delete(item.id);
+        req.onsuccess = res;
+        req.onerror = rej;
+      });
+    }
+    if (oldRecycles.length > 0) flash(`${oldRecycles.length}个旧回收项已清理。`, 'warn');
+  });
+
+  // 快捷键
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' && selLeft && selRight && !paused) { e.preventDefault(); checkMatch(); }
+    if (e.key === 'Escape') { paused = false; el.pauseBtn.textContent = '暂停'; flash('已恢复。', 'warn'); }
+  });
+
+  // 初始加载
+  const init = safeAsync(async () => {
+    await initDB();
+    await compressOld();
+    initTTS();
+    const savedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
+    forceThreshold = savedSettings.forceThreshold || 50;
+    enableNotify = savedSettings.enableNotify || false;
+    enableTTS = savedSettings.enableTTS !== false;
+    ttsAccent = savedSettings.ttsAccent || 'en-US';
+    enableSentence = savedSettings.enableSentence !== false;
+    enableSwipe = savedSettings.enableSwipe !== false;
+    allowSkipForce = savedSettings.allowSkipForce !== false;
+    el.forceThreshold.value = forceThreshold;
+    el.enableNotify.checked = enableNotify;
+    el.enableTTS.checked = enableTTS;
+    el.ttsAccent.value = ttsAccent;
+    el.enableSentence.checked = enableSentence;
+    el.enableSwipe.checked = enableSwipe;
+    el.allowSkipForce.checked = allowSkipForce;
+    el.sessionName.value = new Date().toISOString().slice(0, 10) + '-基础';
+    el.dataBox.oninput();
+    flash('欢迎使用！粘贴词组后点击加载。支持SM-2评级与JSON同步。', 'muted');
+    if ('serviceWorker' in navigator && 'caches' in window) {
+      navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
+        const CACHE_NAME = 'match-trainer-v1';
+        self.addEventListener('install', e => {
+          e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./'])));
+        });
+        self.addEventListener('fetch', e => {
+          e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+        });
+      `));
+    }
+    checkForce(); // 初始化检查
+  });
+  init();
+
+  // 全局暴露
+  window.loadSession = loadSession;
+  window.deleteSession = deleteSession;
+})();
+</script>
+</body>
+</html>
